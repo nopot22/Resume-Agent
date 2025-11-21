@@ -87,7 +87,7 @@ function App() {
             <button onClick={() => fileInputARef.current?.click()}>
               Choose Job
             </button>
-            <span>{fileAName || 'No file chosen'}</span>
+            <span className='span-container' >{fileAName || 'No file chosen'}</span>
           </div>
 
           <div style={{ marginBottom: 12 }}>
@@ -114,7 +114,7 @@ function App() {
             <button onClick={() => fileInputBRef.current?.click()}>
               Choose Resume
             </button>
-            <span>{fileBName || 'No file chosen'}</span>
+            <span className='span-container'>{fileBName || 'No file chosen'}</span>
           </div>
 
           <div>
