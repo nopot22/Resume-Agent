@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-import sys
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -17,7 +16,15 @@ client = genai.Client(api_key = api_key)
 
 
 def get_text_from_pdf(filename):
-    '''This function converts the given PDF file into text'''
+    '''
+        This function converts the given PDF file into text
+
+        Args:
+            filename: path to the PDF file
+        
+        Returns:
+            return_string: PDF text converted to a string
+    '''
     return_string = ''
     with pdfplumber.open(filename) as pdf:
             for page in pdf.pages:
@@ -26,7 +33,18 @@ def get_text_from_pdf(filename):
 
 
 def send_to_llm(job_file, resume_file, prompt = 'Summarize this resume and see if the candidate is a good fit for the role.'):
-    '''This function calls the pdf text extraction function and then calls the LLM and returns the response.'''
+    '''
+        This helper function calls the pdf text extraction function and then calls the LLM and returns the response.
+
+        Args:
+            job_file: The job description, required
+            resume_file: The resume in question, required
+            prompt: Additional user specified prompt, optional
+
+        Returns:
+            response: LLM response
+
+    '''
     extracted_job_text = get_text_from_pdf(job_file)
     extracted_resume_text = get_text_from_pdf(resume_file)
     #Process the pdfs into text to easily send to the LLM
@@ -73,9 +91,18 @@ def send_to_llm(job_file, resume_file, prompt = 'Summarize this resume and see i
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    # -------------------------------
-    # 1. Get files & prompt from form
-    # -------------------------------
+    '''
+        Post method that takes a job file, resume file, and a prompt and returns LLM response. 
+
+        Args:
+            job_file: The job description, required
+            resume_file: The resume in question, required
+            prompt: Additional user specified prompt, optional
+        
+        Returns:
+            200 response and LLM response if everything ok
+            500 response and error message if everything not ok
+    '''
     job_file = request.files.get("job_file")
     resume_file = request.files.get("resume_file")
     prompt = request.form.get("prompt")
@@ -95,55 +122,10 @@ def upload():
             'message':"Something went wrong, please try again",
         }), 500
     
-    # ------------------------------------
-    # 3. Return a response
-    # ------------------------------------
     return jsonify({
         "message": "Upload successful",
         "llm_output": response.text,
     }), 200
 
-
-def main():
-    
-    verbose_flag = False
-
-    #file_path = "C:\\Users\\User\\Documents\\Resumes\\Resume-NoahPotter.pdf"
-    #extracted_text = get_text_from_pdf(file_path)
-    #print(extracted_text)
-
-    #job_description_path = "C:\Users\User\Documents\Projects\ResumeAgent\Nuvia-Job-Description.pdf"
-    #job_text = get_text_from_pdf(job_description_path)
-
-    #system_prompt = f
-    '''
-        You are a helpful resume summarization agent. 
-
-        You will be given a job description as part of the system prompt and then compare it
-        against the given resume in the users first regular prompt. Your job is summarize the
-        applicants abilities according to their resume, and respond with this summary. You are 
-        not to give any suggestions in the response only the summary of the resume. 
-
-        Here is the job description: {job_text}
-     '''
-    
-    '''messages = [
-        types.Content(role='user', parts=[types.Part(text=prompt)]),
-    ]
-
-    config=types.GenerateContentConfig(
-        system_instruction=system_prompt
-            )
-    
-    try:
-        response = client.models.generate_content(
-                model ='gemini-2.0-flash-001', 
-                contents = messages, 
-                config = config
-            )
-    except Exception as e:
-        print(e)
-        return'''
-''
 if __name__ == "__main__":
     app.run(host="localhost", port=8000, debug=True)

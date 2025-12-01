@@ -17,6 +17,28 @@ function App() {
   const fileInputARef = useRef<HTMLInputElement | null>(null)
   const fileInputBRef = useRef<HTMLInputElement | null>(null)
 
+  /**
+ * handleClick - Submits job and resume PDFs to the backend LLM API
+ * 
+ * Validates that both files are selected, sends them along with a user prompt
+ * to the backend endpoint, and updates UI state with the LLM response or error.
+ * 
+ * Flow:
+ * 1. Validates fileA and fileB are selected
+ * 2. Sets loading state and clears previous output/errors
+ * 3. Creates FormData with job_file, resume_file, and prompt
+ * 4. POSTs to http://localhost:8000/upload
+ * 5. On success: displays llm_output in UI
+ * 6. On error: displays error message
+ * 7. Sets loading to false when complete
+ * 
+ * Dependencies:
+ * - fileA, fileB, textValue (state)
+ * - setLoading, setError, setLlmOutput (setState functions)
+ * 
+ * @throws {Error} Catches network errors and displays generic "Network error" message
+ * @returns {void}
+ */
   const handleClick = async () => {
     if (!fileA || !fileB) {
       alert("Please select both files");
